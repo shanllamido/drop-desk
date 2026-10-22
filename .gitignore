@@ -1,2 +1,3 @@
 drop-desk.html
 .vercel
+.env*
