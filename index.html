@@ -1,0 +1,795 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Drop Desk: launch ops for a DTC apparel brand. Roadmap, repeatable launch checklist, automatic risk flags, chase list and retros. A portfolio demo by Shan Llamido.">
+<meta property="og:title" content="Drop Desk">
+<meta property="og:description" content="Launch roadmap, repeatable checklist, risk flags, chase list and retros for a DTC apparel brand.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%232B43B3'/%3E%3Crect x='13' y='13' width='6' height='6' transform='rotate(45 16 16)' fill='white'/%3E%3C/svg%3E">
+<style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>Drop Desk</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..800&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: label-strip header with tabs, one working view below; roadmap is a gantt on a day scale, launches read like a garment care label */
+:root {
+  --bg: #EEF0F4;
+  --card: #FFFFFF;
+  --ink: #161A2B;
+  --muted: #5D6479;
+  --line: #D8DCE6;
+  --soft: #E4E7EE;
+  --accent: #2B43B3;
+  --accent-ink: #FFFFFF;
+  --ok: #2B7A4B;
+  --warn: #A86A12;
+  --bad: #BE3B26;
+  --ok-bg: #E2F1E7;
+  --warn-bg: #F8ECD6;
+  --bad-bg: #F8E1DC;
+  --ws-l: 56%;
+  --ws-c: 0.13;
+  --font-display: "Archivo", "Helvetica Neue", Arial, sans-serif;
+  --font-body: "Archivo", "Helvetica Neue", Arial, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #10121A; --card: #191C27; --ink: #E7E9F2; --muted: #9AA0B5; --line: #2B2F3F; --soft: #222634;
+    --accent: #8FA2FF; --accent-ink: #10121A;
+    --ok: #62C48B; --warn: #E2AF4C; --bad: #F07B65;
+    --ok-bg: #173226; --warn-bg: #3A2C12; --bad-bg: #3D1E19;
+    --ws-l: 74%; --ws-c: 0.11;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #10121A; --card: #191C27; --ink: #E7E9F2; --muted: #9AA0B5; --line: #2B2F3F; --soft: #222634;
+  --accent: #8FA2FF; --accent-ink: #10121A;
+  --ok: #62C48B; --warn: #E2AF4C; --bad: #F07B65;
+  --ok-bg: #173226; --warn-bg: #3A2C12; --bad-bg: #3D1E19;
+  --ws-l: 74%; --ws-c: 0.11;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--ink); font-family: var(--font-body); font-size: 14px; line-height: 1.45; }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--card); }
+button, input, select, textarea { font: inherit; color: inherit; }
+button { cursor: pointer; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.wrap { max-width: 1180px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.num, .mono { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+
+/* header */
+.top { background: var(--card); border-bottom: 1px solid var(--line); position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; }
+.top .wrap { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 20px; padding-block: 12px 0; }
+.brand { display: flex; align-items: baseline; gap: 10px; flex: 1 1 auto; min-width: 0; }
+.brand h1 { margin: 0; font-family: var(--font-display); font-stretch: 125%; font-weight: 800; font-size: 19px; letter-spacing: 0.02em; text-transform: uppercase; }
+.brand span { color: var(--muted); font-size: 12.5px; }
+.tabs { display: flex; gap: 2px; width: 100%; overflow-x: auto; scrollbar-width: none; }
+.tab { border: 0; background: none; padding: 10px 12px 11px; font-weight: 600; color: var(--muted); border-bottom: 2px solid transparent; white-space: nowrap; }
+.tab[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--accent); }
+.tab .count { font-family: var(--font-mono); font-size: 11px; background: var(--bad-bg); color: var(--bad); border-radius: 9px; padding: 1px 6px; margin-left: 4px; }
+
+.btn { border: 1px solid var(--line); background: var(--card); border-radius: 7px; padding: 7px 12px; font-weight: 600; font-size: 13px; }
+.btn:hover { border-color: var(--muted); }
+.btn.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+.btn.small { padding: 4px 9px; font-size: 12px; }
+.btn.ghost { border-color: transparent; background: none; color: var(--muted); }
+.btn.ghost:hover { color: var(--ink); }
+
+main { padding-block: 22px 60px; }
+.view-head { display: flex; flex-wrap: wrap; align-items: end; justify-content: space-between; gap: 12px; margin-bottom: 16px; }
+.view-head h2 { margin: 0; font-family: var(--font-display); font-stretch: 112%; font-size: 22px; font-weight: 750; text-wrap: balance; }
+.view-head p { margin: 4px 0 0; color: var(--muted); max-width: 62ch; }
+.eyebrow { font-size: 11px; font-weight: 700; letter-spacing: 0.09em; text-transform: uppercase; color: var(--muted); }
+.panel { background: var(--card); border: 1px solid var(--line); border-radius: 10px; }
+.panel-h { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 12px 16px; border-bottom: 1px solid var(--line); }
+.panel-h h3 { margin: 0; font-size: 14px; font-weight: 700; }
+.empty { padding: 18px 16px; color: var(--muted); }
+
+/* pills */
+.pill { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 700; border-radius: 20px; padding: 3px 10px; white-space: nowrap; }
+.pill::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+.h-ok { color: var(--ok); background: var(--ok-bg); }
+.h-risk { color: var(--warn); background: var(--warn-bg); }
+.h-off { color: var(--bad); background: var(--bad-bg); }
+.h-launched { color: var(--muted); background: var(--soft); }
+.ws-chip { display: inline-block; font-size: 10.5px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; padding: 2px 7px; border-radius: 4px; color: var(--card); background: oklch(var(--ws-l) var(--ws-c) var(--h)); white-space: nowrap; }
+.tag { font-size: 10.5px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; border: 1px solid var(--line); color: var(--muted); padding: 1px 6px; border-radius: 4px; white-space: nowrap; }
+.tag.crit { border-color: var(--bad); color: var(--bad); }
+
+/* summary strip */
+.strip { display: flex; flex-wrap: wrap; gap: 8px 28px; padding: 14px 16px; margin-bottom: 16px; }
+.strip div { display: flex; align-items: baseline; gap: 8px; }
+.strip b { font-family: var(--font-mono); font-size: 20px; font-weight: 600; }
+.strip span { color: var(--muted); font-size: 13px; }
+.strip .bad b { color: var(--bad); }
+.strip .warn b { color: var(--warn); }
+
+/* gantt */
+.gantt { overflow-x: auto; }
+.g-inner { min-width: 760px; }
+.g-row { display: grid; grid-template-columns: 200px 1fr; border-bottom: 1px solid var(--line); }
+.g-row:last-child { border-bottom: 0; }
+.g-label { padding: 10px 12px 10px 16px; min-width: 0; border-right: 1px solid var(--line); }
+.g-label button { border: 0; background: none; padding: 0; text-align: left; font-weight: 700; display: block; width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.g-label button:hover { color: var(--accent); }
+.g-label small { color: var(--muted); font-size: 12px; display: flex; gap: 8px; align-items: center; margin-top: 3px; }
+.g-track { position: relative; height: 62px; }
+.g-head .g-track { height: 30px; }
+.g-month { position: absolute; top: 0; bottom: 0; border-left: 1px solid var(--line); padding: 7px 0 0 6px; font-size: 11px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
+.g-grid { position: absolute; top: 0; bottom: 0; border-left: 1px dashed var(--soft); }
+.g-today { position: absolute; top: 0; bottom: 0; width: 0; border-left: 2px solid var(--accent); z-index: 2; }
+.g-today-label { position: absolute; top: 6px; transform: translateX(-50%); background: var(--accent); color: var(--accent-ink); font-size: 10px; font-weight: 700; padding: 1px 6px; border-radius: 3px; z-index: 3; letter-spacing: 0.05em; }
+.g-bar { position: absolute; top: 22px; height: 18px; border-radius: 4px; background: var(--soft); border: 1px solid var(--line); overflow: hidden; cursor: pointer; }
+.g-bar .fill { position: absolute; inset: 0 auto 0 0; background: oklch(var(--ws-l) 0.06 265 / 0.55); }
+.g-bar.h-off { border-color: var(--bad); }
+.g-bar.h-risk { border-color: var(--warn); }
+.g-ms { position: absolute; top: 18px; width: 2px; height: 26px; background: var(--muted); z-index: 1; }
+.g-ms.done { background: var(--ink); opacity: 0.35; }
+.g-ms.late { background: var(--bad); width: 3px; }
+.g-launch { position: absolute; top: 24px; width: 14px; height: 14px; transform: translateX(-7px) rotate(45deg); background: var(--ink); z-index: 2; }
+.g-launch-label { position: absolute; top: 44px; font-size: 11px; color: var(--muted); white-space: nowrap; transform: translateX(-50%); font-family: var(--font-mono); }
+.g-retro { position: absolute; top: 30px; height: 0; border-top: 2px dotted var(--muted); }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 18px; padding: 10px 16px; border-top: 1px solid var(--line); font-size: 12px; color: var(--muted); }
+.legend i { display: inline-block; vertical-align: middle; margin-right: 6px; }
+
+.two { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 16px; }
+@media (max-width: 820px) { .two { grid-template-columns: 1fr; } }
+.two > * { min-width: 0; }
+
+/* flag list */
+.flags { list-style: none; margin: 0; padding: 0; }
+.flags li { display: grid; grid-template-columns: 4px 1fr auto; gap: 12px; padding: 10px 16px 10px 0; border-bottom: 1px solid var(--line); align-items: start; }
+.flags li:last-child { border-bottom: 0; }
+.flags .sev { align-self: stretch; border-radius: 0 3px 3px 0; }
+.sev.off { background: var(--bad); } .sev.risk { background: var(--warn); } .sev.info { background: var(--muted); }
+.flags p { margin: 0; }
+.flags small { color: var(--muted); }
+
+/* task list (compact, for roadmap week list) */
+.mini { list-style: none; margin: 0; padding: 0; }
+.mini li { display: grid; grid-template-columns: 74px 1fr auto; gap: 10px; padding: 9px 16px; border-bottom: 1px solid var(--line); align-items: baseline; }
+.mini li:last-child { border-bottom: 0; }
+.mini .when { font-family: var(--font-mono); font-size: 12px; color: var(--muted); }
+.mini .when.late { color: var(--bad); font-weight: 600; }
+.mini small { color: var(--muted); display: block; }
+
+/* launch picker */
+.picker { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+.picker button { border: 1px solid var(--line); background: var(--card); border-radius: 20px; padding: 6px 12px; font-weight: 600; font-size: 13px; display: inline-flex; gap: 8px; align-items: center; }
+.picker button[aria-pressed="true"] { border-color: var(--ink); box-shadow: inset 0 0 0 1px var(--ink); }
+.picker .dot { width: 8px; height: 8px; border-radius: 50%; }
+.dot.ok { background: var(--ok); } .dot.risk { background: var(--warn); } .dot.off { background: var(--bad); } .dot.launched { background: var(--muted); }
+
+/* care label header */
+.label-card { display: grid; grid-template-columns: 1fr auto; gap: 16px 24px; padding: 18px 20px; position: relative; }
+.label-card::after { content: ""; position: absolute; left: 10px; right: 10px; top: 6px; border-top: 1px dashed var(--line); }
+.label-card h2 { margin: 6px 0 4px; font-family: var(--font-display); font-stretch: 125%; font-weight: 800; font-size: 26px; text-transform: uppercase; letter-spacing: 0.01em; line-height: 1.1; text-wrap: balance; }
+.label-meta { display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; color: var(--muted); font-size: 13px; }
+.label-meta label { display: inline-flex; gap: 6px; align-items: center; }
+.label-meta input[type="date"] { border: 1px solid var(--line); background: var(--bg); border-radius: 6px; padding: 4px 6px; }
+.countdown { text-align: right; }
+.countdown .big { font-family: var(--font-mono); font-size: 38px; font-weight: 600; line-height: 1; letter-spacing: -0.02em; }
+.countdown small { display: block; color: var(--muted); font-size: 12px; margin-top: 4px; }
+.ready { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(8, 1fr); gap: 4px; }
+.ready div { height: 6px; border-radius: 3px; background: var(--soft); overflow: hidden; }
+.ready div span { display: block; height: 100%; background: oklch(var(--ws-l) var(--ws-c) var(--h)); }
+@media (max-width: 560px) { .label-card { grid-template-columns: 1fr; } .countdown { text-align: left; } .ready { grid-template-columns: repeat(4, 1fr); } }
+
+.toolbar { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: space-between; margin: 16px 0 10px; }
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: 7px; overflow: hidden; background: var(--card); }
+.seg button { border: 0; background: none; padding: 6px 12px; font-size: 13px; font-weight: 600; color: var(--muted); }
+.seg button[aria-pressed="true"] { background: var(--ink); color: var(--card); }
+
+/* checklist */
+.ws { margin-bottom: 12px; }
+.ws-h { display: flex; align-items: center; gap: 10px; padding: 10px 16px; border-bottom: 1px solid var(--line); }
+.ws-h .prog { margin-left: auto; font-family: var(--font-mono); font-size: 12px; color: var(--muted); }
+.task { display: grid; grid-template-columns: 22px minmax(0, 1fr) 150px 132px 118px 28px; gap: 10px; align-items: center; padding: 8px 12px 8px 16px; border-bottom: 1px solid var(--line); }
+.task:last-of-type { border-bottom: 0; }
+.task.is-done .tname { color: var(--muted); text-decoration: line-through; text-decoration-color: var(--line); }
+.task input[type="checkbox"] { width: 17px; height: 17px; accent-color: var(--accent); margin: 0; }
+.tname { font-weight: 600; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.note { display: block; width: 100%; border: 0; background: none; padding: 0; font-size: 12.5px; color: var(--muted); margin-top: 2px; }
+.note::placeholder { color: transparent; }
+.task:hover .note::placeholder, .note:focus::placeholder { color: var(--muted); opacity: 0.6; }
+.note:focus { outline: none; color: var(--ink); }
+.task select, .task input[type="date"] { width: 100%; border: 1px solid var(--line); background: var(--bg); border-radius: 6px; padding: 4px 6px; font-size: 12.5px; min-width: 0; }
+.due small { display: block; font-family: var(--font-mono); font-size: 11px; color: var(--muted); margin-top: 2px; }
+.due small.late { color: var(--bad); font-weight: 600; }
+.st { font-weight: 600; }
+.st-blocked { color: var(--bad); border-color: var(--bad) !important; }
+.st-doing { color: var(--warn); }
+.st-done { color: var(--ok); }
+.x { border: 0; background: none; color: var(--muted); font-size: 17px; line-height: 1; padding: 4px; border-radius: 4px; }
+.x:hover { color: var(--bad); background: var(--bad-bg); }
+.addrow { display: flex; gap: 8px; padding: 8px 12px 10px 48px; }
+.addrow input { flex: 1; min-width: 0; border: 1px dashed var(--line); background: none; border-radius: 6px; padding: 5px 8px; font-size: 13px; }
+@media (max-width: 860px) {
+  .task { grid-template-columns: 22px minmax(0, 1fr) 28px; grid-template-areas: "c n x" ". o o" ". d d" ". s s"; row-gap: 6px; }
+  .task > :nth-child(1) { grid-area: c; } .task > :nth-child(2) { grid-area: n; } .task > :nth-child(3) { grid-area: o; }
+  .task > :nth-child(4) { grid-area: d; } .task > :nth-child(5) { grid-area: s; } .task > :nth-child(6) { grid-area: x; }
+  .addrow { padding-left: 16px; }
+}
+
+/* chase */
+.owners { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 14px; }
+@media (max-width: 420px) { .owners { grid-template-columns: 1fr; } }
+.owner-h { display: flex; justify-content: space-between; gap: 10px; align-items: start; padding: 14px 16px 10px; }
+.owner-h h3 { margin: 0; font-size: 15px; }
+.owner-h small { color: var(--muted); }
+.owner textarea { display: block; width: calc(100% - 32px); margin: 0 16px 14px; min-height: 120px; border: 1px solid var(--line); background: var(--bg); border-radius: 6px; padding: 8px; font-size: 12.5px; resize: vertical; }
+.owner-f { display: flex; gap: 8px; align-items: center; padding: 10px 16px 14px; }
+.owner-f span { font-size: 12px; color: var(--ok); }
+
+/* template */
+.tpl-row { display: grid; grid-template-columns: minmax(0, 1fr) 96px 170px 86px 28px; gap: 10px; align-items: center; padding: 7px 12px 7px 16px; border-bottom: 1px solid var(--line); }
+.tpl-row input[type="text"], .tpl-row input[type="number"], .tpl-row select { width: 100%; border: 1px solid var(--line); background: var(--bg); border-radius: 6px; padding: 5px 7px; font-size: 13px; min-width: 0; }
+.tpl-row .tm { display: flex; align-items: center; gap: 4px; font-family: var(--font-mono); font-size: 12px; color: var(--muted); }
+.tpl-row label { display: flex; gap: 6px; align-items: center; font-size: 12px; color: var(--muted); }
+@media (max-width: 700px) { .tpl-row { grid-template-columns: minmax(0, 1fr) 90px 28px; } .tpl-row > :nth-child(3) { grid-column: 1 / 2; } .tpl-row > :nth-child(4) { grid-column: 2 / 4; } }
+.timeline { padding: 14px 16px 18px; overflow-x: auto; }
+.tl { position: relative; min-width: 640px; height: 170px; }
+.tl .row { position: absolute; left: 70px; right: 0; height: 16px; }
+.tl .row b { position: absolute; left: -70px; width: 64px; font-size: 10.5px; letter-spacing: 0.05em; text-transform: uppercase; color: var(--muted); top: 1px; }
+.tl .tick { position: absolute; top: 3px; width: 10px; height: 10px; border-radius: 2px; transform: translateX(-5px); background: oklch(var(--ws-l) var(--ws-c) var(--h)); }
+.tl .tick.crit { border-radius: 50%; box-shadow: 0 0 0 2px var(--card), 0 0 0 3px var(--bad); }
+.tl .axis { position: absolute; left: 70px; right: 0; bottom: 0; height: 18px; border-top: 1px solid var(--line); }
+.tl .axis span { position: absolute; top: 3px; transform: translateX(-50%); font-family: var(--font-mono); font-size: 10.5px; color: var(--muted); }
+
+/* retro */
+.kv { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; padding: 14px 16px; }
+@media (max-width: 700px) { .kv { grid-template-columns: 1fr 1fr; } }
+.kv label { display: grid; gap: 4px; font-size: 12px; color: var(--muted); font-weight: 600; }
+.kv input { border: 1px solid var(--line); background: var(--bg); border-radius: 6px; padding: 6px 8px; font-family: var(--font-mono); font-size: 14px; color: var(--ink); min-width: 0; width: 100%; }
+.kv .derived { font-family: var(--font-mono); font-size: 14px; color: var(--ink); padding: 6px 0; }
+.slips { padding: 12px 16px 16px; display: grid; gap: 8px; }
+.slip { display: grid; grid-template-columns: 82px 1fr 64px; gap: 10px; align-items: center; font-size: 12.5px; }
+.slip .bar { height: 12px; background: var(--soft); border-radius: 3px; position: relative; }
+.slip .bar span { position: absolute; inset: 0 auto 0 0; border-radius: 3px; background: oklch(var(--ws-l) var(--ws-c) var(--h)); }
+.slip .v { font-family: var(--font-mono); text-align: right; color: var(--muted); }
+.notes { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 14px 16px; }
+@media (max-width: 700px) { .notes { grid-template-columns: 1fr; } }
+.notes label { display: grid; gap: 6px; font-size: 12px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
+.notes textarea { min-height: 110px; border: 1px solid var(--line); background: var(--bg); border-radius: 6px; padding: 8px; font-size: 13.5px; text-transform: none; letter-spacing: 0; font-weight: 400; color: var(--ink); resize: vertical; }
+.sugg li { grid-template-columns: 4px 1fr auto; }
+
+/* modal */
+.scrim { position: fixed; inset: 0; background: rgb(10 12 20 / 0.45); display: grid; place-items: center; z-index: 20; padding: 16px; }
+.modal { width: min(460px, 100%); background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 20px; display: grid; gap: 14px; }
+.modal h3 { margin: 0; font-family: var(--font-display); font-stretch: 112%; font-size: 18px; }
+.modal label { display: grid; gap: 5px; font-size: 12.5px; font-weight: 600; color: var(--muted); }
+.modal input { border: 1px solid var(--line); background: var(--bg); border-radius: 7px; padding: 8px 10px; font-size: 14px; color: var(--ink); }
+.modal .hint { font-size: 13px; margin: 0; padding: 10px 12px; border-radius: 7px; background: var(--soft); }
+.modal .hint.warn { background: var(--warn-bg); color: var(--warn); }
+.modal .row { display: flex; gap: 8px; justify-content: flex-end; }
+
+footer { color: var(--muted); font-size: 12px; display: flex; flex-wrap: wrap; gap: 10px; justify-content: space-between; align-items: center; padding-block: 0 30px; }
+.toast { position: fixed; left: 50%; bottom: calc(18px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); background: var(--ink); color: var(--card); padding: 8px 14px; border-radius: 8px; font-size: 13px; font-weight: 600; z-index: 30; }
+@media (prefers-reduced-motion: no-preference) { .g-bar .fill, .ready span, .slip .bar span { transition: width .3s ease; } }
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="wrap">
+    <div class="brand"><h1>Drop Desk</h1><span>Launch ops for Fieldwork Apparel · sample data</span></div>
+    <button class="btn primary" data-act="new-launch" id="new-launch-btn">New launch</button>
+    <nav class="tabs" role="tablist" id="tabs"></nav>
+  </div>
+</header>
+<main class="wrap" id="view"></main>
+<footer class="wrap">
+  <span>Saved in this browser only. Dates are relative to today, so the sample stays live.</span>
+  <button class="btn ghost small" data-act="reset" id="reset-btn">Reset sample data</button>
+</footer>
+<div id="layer"></div>
+
+<script>
+const WS = [
+  { k: 'product', label: 'Product', h: 265 },
+  { k: 'creative', label: 'Creative', h: 330 },
+  { k: 'content', label: 'Content', h: 295 },
+  { k: 'email', label: 'Email', h: 200 },
+  { k: 'paid', label: 'Paid', h: 150 },
+  { k: 'pr', label: 'PR', h: 20 },
+  { k: 'stock', label: 'Stock', h: 60 },
+  { k: 'site', label: 'Site', h: 230 },
+];
+const WSMAP = Object.fromEntries(WS.map(w => [w.k, w]));
+const STATUS = { todo: 'To do', doing: 'In progress', blocked: 'Blocked', done: 'Done' };
+const HEALTH = { ok: 'On track', risk: 'At risk', off: 'Off track', launched: 'Launched' };
+const KEY = 'drop-desk-v1';
+const DAY = 86400000;
+
+const todayNum = () => { const d = new Date(); return Math.floor(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()) / DAY); };
+const T = todayNum();
+const asDate = n => new Date(n * DAY);
+const fmt = (n, o = { weekday: 'short', day: 'numeric', month: 'short' }) => asDate(n).toLocaleDateString('en-GB', { ...o, timeZone: 'UTC' });
+const iso = n => asDate(n).toISOString().slice(0, 10);
+const fromIso = s => Math.round(Date.parse(s + 'T00:00:00Z') / DAY);
+const uid = () => Math.random().toString(36).slice(2, 9);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const tLabel = (due, launch) => { const d = due - launch; return d === 0 ? 'T–0' : d < 0 ? 'T–' + (-d) : 'T+' + d; };
+const rel = n => { const d = n - T; if (d === 0) return 'today'; if (d === 1) return 'tomorrow'; if (d === -1) return '1 day late'; return d < 0 ? (-d) + ' days late' : 'in ' + d + ' days'; };
+const wsStyle = k => `style="--h:${WSMAP[k]?.h ?? 0}"`;
+
+/* ---------- sample data ---------- */
+const PEOPLE = [
+  { name: 'Shan', role: 'Launch manager', type: 'Team' },
+  { name: 'Mara', role: 'Product & buying', type: 'Team' },
+  { name: 'Jonas', role: 'Creative director', type: 'Team' },
+  { name: 'Lea', role: 'Content & social', type: 'Team' },
+  { name: 'Tom', role: 'Email & CRM', type: 'Team' },
+  { name: 'Ravi', role: 'Site & Shopify', type: 'Team' },
+  { name: 'Priya', role: 'Paid media', type: 'Freelancer' },
+  { name: 'Ines', role: 'PR', type: 'Freelancer' },
+  { name: 'Kit Studio', role: 'Photography & retouch', type: 'Freelancer' },
+  { name: 'Porto Knit Co.', role: 'Factory', type: 'Supplier' },
+  { name: 'Packhaus 3PL', role: 'Warehouse', type: 'Supplier' },
+];
+const TEMPLATE = [
+  ['product', 'Final samples approved', 70, 'Mara', 1],
+  ['product', 'Size & fit sign-off', 56, 'Mara', 0],
+  ['product', 'Pricing & margin locked', 49, 'Mara', 0],
+  ['product', 'Product copy, specs & care', 21, 'Mara', 0],
+  ['creative', 'Moodboard & shot list', 45, 'Jonas', 0],
+  ['creative', 'Campaign shoot', 35, 'Kit Studio', 1],
+  ['creative', 'Retouching & selects', 24, 'Kit Studio', 0],
+  ['creative', 'Video edits & cutdowns', 18, 'Jonas', 0],
+  ['content', 'Creator seeding sent', 21, 'Lea', 0],
+  ['content', 'Social calendar planned', 14, 'Lea', 0],
+  ['content', 'Teaser posts scheduled', 7, 'Lea', 0],
+  ['email', 'Launch email sequence drafted', 12, 'Tom', 0],
+  ['email', 'VIP early-access list set up', 5, 'Tom', 0],
+  ['email', 'Emails QA’d & scheduled', 2, 'Tom', 1],
+  ['paid', 'Paid plan & budget agreed', 21, 'Priya', 0],
+  ['paid', 'Ad creative built', 10, 'Priya', 0],
+  ['paid', 'Campaigns set up & approved', 3, 'Priya', 0],
+  ['pr', 'Press release & lookbook', 28, 'Ines', 0],
+  ['pr', 'Press samples sent', 21, 'Ines', 0],
+  ['pr', 'Embargoed outreach', 10, 'Ines', 0],
+  ['stock', 'PO placed with factory', 84, 'Porto Knit Co.', 1],
+  ['stock', 'Inline QC inspection', 35, 'Porto Knit Co.', 0],
+  ['stock', 'Stock ex-factory', 28, 'Porto Knit Co.', 1],
+  ['stock', 'Stock received at warehouse', 10, 'Packhaus 3PL', 1],
+  ['stock', 'Inventory live in Shopify', 3, 'Ravi', 0],
+  ['site', 'PDPs built', 10, 'Ravi', 0],
+  ['site', 'Collection page & homepage takeover', 5, 'Ravi', 0],
+  ['site', 'Site QA: mobile, checkout, size guide', 2, 'Ravi', 1],
+  ['site', 'Go live', 0, 'Shan', 1],
+].map(([ws, name, off, owner, crit], i) => ({ id: 't' + (i + 1), ws, name, off, owner, crit: !!crit }));
+const tid = name => TEMPLATE.find(t => t.name === name).id;
+
+function genTasks(date, template) {
+  return template.map(t => ({ id: uid(), tid: t.id, ws: t.ws, name: t.name, due: date - t.off, owner: t.owner, crit: t.crit, status: 'todo', doneOn: null, note: '' }));
+}
+function seedLaunch(name, collection, date, opts = {}) {
+  const tasks = genTasks(date, TEMPLATE);
+  for (const t of tasks) {
+    const ex = opts.exceptions?.[t.name];
+    if (ex) { t.status = ex.status; t.note = ex.note || ''; if (ex.status === 'done') t.doneOn = t.due + (ex.slip || 0); continue; }
+    if (t.due < T) { t.status = 'done'; t.doneOn = Math.min(T, t.due + (opts.slips?.[t.name] || 0)); }
+    else if (t.due <= T + 4) t.status = 'doing';
+  }
+  return { id: uid(), name, collection, date, tasks, retro: opts.retro || { revenue: '', target: '', sellThrough: '', units: '', wins: '', misses: '', applied: [] } };
+}
+function sample() {
+  return {
+    people: PEOPLE.map(p => ({ ...p })),
+    template: TEMPLATE.map(t => ({ ...t })),
+    launches: [
+      seedLaunch('Merino Base Layers', 'Core · restock + 2 new colours', T - 20, {
+        slips: { 'Campaign shoot': 4, 'Stock received at warehouse': 5, 'PDPs built': 3, 'Press samples sent': 2, 'Retouching & selects': 3, 'Ad creative built': 2 },
+        retro: { revenue: 48200, target: 55000, sellThrough: 62, units: 1480, applied: [],
+          wins: 'VIP early access drove 31% of day-one revenue. Creator seeding landed well, 9 of 14 posted in launch week.',
+          misses: 'Stock landed 5 days late, so PDPs went live with 2 sizes missing. Shoot slipped and paid creative was rushed.' },
+      }),
+      seedLaunch('AW26 Outerwear Drop', 'Waxed jackets, quilted liner, 3 colourways', T + 9, {
+        exceptions: {
+          'Stock received at warehouse': { status: 'doing', note: 'Pallet held at customs, Packhaus waiting on paperwork' },
+          'Ad creative built': { status: 'todo' },
+          'Embargoed outreach': { status: 'doing', note: '6 of 12 editors contacted' },
+          'Launch email sequence drafted': { status: 'done', slip: 1 },
+        },
+      }),
+      seedLaunch('Holiday Gift Edit', 'Gift sets, knit accessories, gift cards', T + 30, {
+        exceptions: { 'Pricing & margin locked': { status: 'blocked', note: 'Waiting on landed cost for gift box from Porto Knit' } },
+      }),
+      seedLaunch('SS27 Linen Capsule', 'Linen shirts, shorts, overshirt', T + 112, {}),
+    ],
+  };
+}
+
+/* ---------- state ---------- */
+let S = load();
+let ui = { tab: 'roadmap', launchId: null, retroId: null, filter: 'all', modal: null, resetArmed: false };
+try { const u = JSON.parse(localStorage.getItem(KEY + '-ui') || '{}'); ui.tab = u.tab || ui.tab; ui.launchId = u.launchId || null; } catch (e) {}
+function load() { try { const s = JSON.parse(localStorage.getItem(KEY)); if (s && s.launches) return s; } catch (e) {} return sample(); }
+function save() {
+  try { localStorage.setItem(KEY, JSON.stringify(S)); localStorage.setItem(KEY + '-ui', JSON.stringify({ tab: ui.tab, launchId: ui.launchId })); } catch (e) {}
+}
+const person = n => S.people.find(p => p.name === n) || { name: n, role: '', type: 'Team' };
+const launchById = id => S.launches.find(l => l.id === id);
+const sortedLaunches = () => [...S.launches].sort((a, b) => a.date - b.date);
+
+/* ---------- risk engine ---------- */
+function analyse(l) {
+  const open = l.tasks.filter(t => t.status !== 'done');
+  const done = l.tasks.length - open.length;
+  const overdue = open.filter(t => t.due < T);
+  const blocked = open.filter(t => t.status === 'blocked');
+  const soonTodo = open.filter(t => t.status === 'todo' && t.due >= T && t.due <= T + 3);
+  const afterLaunch = open.filter(t => t.due > l.date);
+  const launched = l.date < T;
+  const flags = [];
+  if (!launched) {
+    for (const t of overdue) flags.push({ sev: t.crit ? 'off' : 'risk', task: t, launch: l,
+      text: `${t.name} is ${rel(t.due)}`, why: t.crit ? `Critical path. ${t.owner} owns it, launch is ${rel(l.date)}.` : `${t.owner} owns it.` });
+    for (const t of blocked.filter(t => t.due >= T)) flags.push({ sev: t.crit ? 'off' : 'risk', task: t, launch: l,
+      text: `${t.name} is blocked`, why: t.note || `Due ${fmt(t.due)}, nothing can move until it is unblocked.` });
+    for (const t of soonTodo) flags.push({ sev: 'risk', task: t, launch: l, text: `${t.name} is due ${rel(t.due)} and not started`, why: `${t.owner} owns it.` });
+    for (const t of afterLaunch) flags.push({ sev: 'risk', task: t, launch: l, text: `${t.name} is scheduled after launch day`, why: `Due ${fmt(t.due)}, launch is ${fmt(l.date)}.` });
+  }
+  let health = 'ok';
+  if (launched) health = 'launched';
+  else if (overdue.some(t => t.crit) || blocked.some(t => t.crit)) health = 'off';
+  else if (overdue.length || blocked.length || soonTodo.length >= 3 || afterLaunch.length) health = 'risk';
+  flags.sort((a, b) => (a.sev === 'off' ? 0 : 1) - (b.sev === 'off' ? 0 : 1) || a.task.due - b.task.due);
+  return { open, done, total: l.tasks.length, overdue, blocked, flags, health, launched, pct: l.tasks.length ? done / l.tasks.length : 0 };
+}
+function overloaded() {
+  const m = {};
+  for (const l of S.launches) if (l.date >= T) for (const t of l.tasks)
+    if (t.status !== 'done' && t.due <= T + 7) { (m[t.owner] ||= { n: 0, launches: new Set() }); m[t.owner].n++; m[t.owner].launches.add(l.name); }
+  return Object.entries(m).filter(([, v]) => v.n >= 4).map(([name, v]) => ({ name, n: v.n, launches: [...v.launches] }));
+}
+function allFlags() {
+  const out = [];
+  for (const l of sortedLaunches()) out.push(...analyse(l).flags);
+  for (const o of overloaded()) out.push({ sev: 'info', owner: o.name, text: `${o.name} has ${o.n} open tasks due this week`, why: `Across ${o.launches.join(', ')}. Check capacity before adding more.` });
+  return out;
+}
+
+/* ---------- render ---------- */
+const view = document.getElementById('view');
+function render() {
+  const flagsN = allFlags().filter(f => f.sev !== 'info').length;
+  const tabs = [['roadmap', 'Roadmap'], ['launch', 'Launch checklist'], ['chase', 'Chase list', flagsN], ['template', 'Template'], ['retro', 'Retros']];
+  document.getElementById('tabs').innerHTML = tabs.map(([k, l, n]) =>
+    `<button class="tab" role="tab" id="tab-${k}" aria-selected="${ui.tab === k}" data-act="tab" data-k="${k}">${l}${n ? `<span class="count">${n}</span>` : ''}</button>`).join('');
+  view.innerHTML = ({ roadmap, launch: launchView, chase, template: templateView, retro })[ui.tab]();
+  document.getElementById('layer').innerHTML = ui.modal ? modal() : '';
+  document.getElementById('reset-btn').textContent = ui.resetArmed ? 'Click again to reset everything' : 'Reset sample data';
+  save();
+}
+
+function roadmap() {
+  const ls = sortedLaunches();
+  const an = new Map(ls.map(l => [l.id, analyse(l)]));
+  const live = ls.filter(l => l.date >= T);
+  const overdueN = live.reduce((s, l) => s + an.get(l.id).overdue.length, 0);
+  const atRisk = live.filter(l => an.get(l.id).health !== 'ok').length;
+  const next = live[0];
+  const start = T - 35, end = T + 130;
+  const pct = d => ((Math.max(start, Math.min(end, d)) - start) / (end - start)) * 100;
+  let months = '';
+  for (let d = start; d <= end; d++) if (asDate(d).getUTCDate() === 1)
+    months += `<div class="g-month" style="left:${pct(d)}%">${fmt(d, { month: 'short' })}${asDate(d).getUTCMonth() === 0 ? ' ' + asDate(d).getUTCFullYear() : ''}</div>`;
+  const today = `<div class="g-today" style="left:${pct(T)}%"></div>`;
+  const rows = ls.map(l => {
+    const a = an.get(l.id);
+    const first = Math.min(...l.tasks.map(t => t.due));
+    const ms = l.tasks.filter(t => t.crit && t.due >= start && t.due <= end).map(t => {
+      const cls = t.status === 'done' ? 'done' : t.due < T ? 'late' : '';
+      return `<div class="g-ms ${cls}" style="left:${pct(t.due)}%" title="${esc(t.name)} · ${fmt(t.due)} · ${STATUS[t.status]}"></div>`;
+    }).join('');
+    const l0 = pct(first), l1 = pct(l.date);
+    const vis = l.date >= start && first <= end;
+    return `<div class="g-row">
+      <div class="g-label"><button data-act="open-launch" data-id="${l.id}">${esc(l.name)}</button>
+        <small><span class="pill h-${a.health}">${HEALTH[a.health]}</span><span class="num">${Math.round(a.pct * 100)}%</span></small></div>
+      <div class="g-track">${months.replace(/>[^<]*<\/div>/g, '></div>').replace(/g-month/g, 'g-grid')}${today}
+        ${vis ? `<div class="g-bar h-${a.health}" data-act="open-launch" data-id="${l.id}" style="left:${l0}%;width:${Math.max(0.5, l1 - l0)}%" title="${esc(l.name)}: ${fmt(first)} to ${fmt(l.date)}"><div class="fill" style="width:${a.pct * 100}%"></div></div>${ms}
+        ${l.date <= end ? `<div class="g-launch" style="left:${pct(l.date)}%" title="Launch ${fmt(l.date)}"></div><div class="g-launch-label" style="left:${pct(l.date)}%">${fmt(l.date, { day: 'numeric', month: 'short' })}</div>` : ''}
+        ${l.date + 14 <= end ? `<div class="g-retro" style="left:${pct(l.date)}%;width:${pct(l.date + 14) - pct(l.date)}%" title="Review window"></div>` : ''}` : ''}
+      </div></div>`;
+  }).join('');
+  const flags = allFlags();
+  const week = [];
+  for (const l of live) for (const t of l.tasks) if (t.status !== 'done' && t.due <= T + 7) week.push({ t, l });
+  week.sort((a, b) => a.t.due - b.t.due);
+  return `
+    <div class="view-head"><div><div class="eyebrow">${fmt(T, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}</div><h2>Launch roadmap</h2>
+      <p>Every launch from PO to post-launch review on one timeline. Bars fill as checklist tasks are done; ticks are critical-path milestones.</p></div></div>
+    <div class="panel strip">
+      <div><b>${live.length}</b><span>launches in flight</span></div>
+      <div class="${overdueN ? 'bad' : ''}"><b>${overdueN}</b><span>tasks overdue</span></div>
+      <div class="${atRisk ? 'warn' : ''}"><b>${atRisk}</b><span>launches need attention</span></div>
+      ${next ? `<div><b>${next.date - T}d</b><span>to ${esc(next.name)}</span></div>` : ''}
+    </div>
+    <div class="panel">
+      <div class="gantt"><div class="g-inner">
+        <div class="g-row g-head"><div class="g-label"><span class="eyebrow">Launch</span></div><div class="g-track">${months}${today}<div class="g-today-label" style="left:${pct(T)}%">TODAY</div></div></div>
+        ${rows}
+      </div></div>
+      <div class="legend"><span><i class="g-launch" style="position:static;transform:rotate(45deg);width:9px;height:9px"></i>Launch day</span>
+        <span><i style="width:2px;height:12px;background:var(--bad)"></i>Overdue milestone</span>
+        <span><i style="width:2px;height:12px;background:var(--muted)"></i>Upcoming milestone</span>
+        <span><i style="width:18px;border-top:2px dotted var(--muted)"></i>Two-week review window</span></div>
+    </div>
+    <div class="two">
+      <section class="panel"><div class="panel-h"><h3>Flagged early</h3><span class="eyebrow">${flags.length} flags</span></div>
+        ${flags.length ? `<ul class="flags">${flags.slice(0, 8).map(flagLi).join('')}</ul>` : '<p class="empty">Nothing flagged. Every launch is on track.</p>'}</section>
+      <section class="panel"><div class="panel-h"><h3>Due in the next 7 days</h3><span class="eyebrow">${week.length} open</span></div>
+        ${week.length ? `<ul class="mini">${week.slice(0, 10).map(({ t, l }) => `<li><span class="when ${t.due < T ? 'late' : ''}">${t.due < T ? rel(t.due).replace(' days late', 'd late').replace(' day late', 'd late') : fmt(t.due, { weekday: 'short', day: 'numeric' })}</span>
+          <span>${esc(t.name)}<small>${esc(l.name)} · ${esc(t.owner)}</small></span><span class="ws-chip" ${wsStyle(t.ws)}>${WSMAP[t.ws]?.label}</span></li>`).join('')}</ul>` : '<p class="empty">Nothing due this week.</p>'}</section>
+    </div>`;
+}
+function flagLi(f) {
+  const action = f.launch ? `<button class="btn small" data-act="open-launch" data-id="${f.launch.id}">Open</button>` : `<button class="btn small" data-act="tab" data-k="chase">Chase</button>`;
+  return `<li><span class="sev ${f.sev}"></span><div><p><b>${esc(f.text)}</b></p><small>${f.launch ? esc(f.launch.name) + ' · ' : ''}${esc(f.why)}</small></div>${action}</li>`;
+}
+
+function launchPicker(list, selected, act) {
+  return `<div class="picker">${list.map(l => { const a = analyse(l); return `<button aria-pressed="${l.id === selected}" data-act="${act}" data-id="${l.id}"><span class="dot ${a.health}"></span>${esc(l.name)}</button>`; }).join('')}</div>`;
+}
+function launchView() {
+  const ls = sortedLaunches();
+  if (!ls.length) return `<p class="empty">No launches yet. Use New launch to create one from the template.</p>`;
+  let l = launchById(ui.launchId) || ls.find(x => x.date >= T) || ls[0];
+  ui.launchId = l.id;
+  const a = analyse(l);
+  const days = l.date - T;
+  const tasks = l.tasks.filter(t => ui.filter === 'all' || (ui.filter === 'open' ? t.status !== 'done' : t.status !== 'done' && t.due < T));
+  const groups = WS.map(w => {
+    const all = l.tasks.filter(t => t.ws === w.k);
+    const shown = tasks.filter(t => t.ws === w.k).sort((x, y) => x.due - y.due);
+    if (!all.length && ui.filter !== 'all') return '';
+    if (!shown.length && ui.filter !== 'all') return '';
+    const done = all.filter(t => t.status === 'done').length;
+    return `<section class="panel ws"><div class="ws-h"><span class="ws-chip" ${wsStyle(w.k)}>${w.label}</span><span class="prog">${done}/${all.length} done</span></div>
+      ${shown.map(t => taskRow(t, l)).join('')}
+      ${ui.filter === 'all' ? `<form class="addrow" data-form="add-task" data-ws="${w.k}"><input id="add-${w.k}" name="name" placeholder="Add a ${w.label.toLowerCase()} task and press Enter" autocomplete="off"></form>` : ''}</section>`;
+  }).join('');
+  return `
+    ${launchPicker(ls, l.id, 'pick-launch')}
+    <section class="panel label-card">
+      <div><div class="eyebrow">${esc(l.collection || 'Launch')}</div><h2>${esc(l.name)}</h2>
+        <div class="label-meta"><span class="pill h-${a.health}">${HEALTH[a.health]}</span>
+          <label>Launch day <input type="date" id="launch-date" value="${iso(l.date)}" data-act="launch-date"></label>
+          <label><input type="checkbox" id="shift-open" ${ui.shift !== false ? 'checked' : ''} data-act="shift-toggle"> Move open tasks with it</label>
+          <button class="btn ghost small" data-act="delete-launch" data-id="${l.id}">${ui.delArmed === l.id ? 'Click again to delete' : 'Delete launch'}</button></div></div>
+      <div class="countdown"><div class="big">${days >= 0 ? 'T–' + days : 'T+' + (-days)}</div><small>${days > 0 ? 'days to launch · ' + fmt(l.date) : days === 0 ? 'Launch day' : 'Launched ' + fmt(l.date)}</small><small class="num">${a.done}/${a.total} tasks done</small></div>
+      <div class="ready" aria-label="Readiness by workstream">${WS.map(w => { const all = l.tasks.filter(t => t.ws === w.k); const d = all.filter(t => t.status === 'done').length; return `<div ${wsStyle(w.k)} title="${w.label}: ${d}/${all.length}"><span style="width:${all.length ? d / all.length * 100 : 0}%"></span></div>`; }).join('')}</div>
+    </section>
+    ${a.flags.length ? `<section class="panel" style="margin-top:12px"><div class="panel-h"><h3>Risks on this launch</h3><span class="eyebrow">${a.flags.length}</span></div><ul class="flags">${a.flags.map(f => `<li><span class="sev ${f.sev}"></span><div><p><b>${esc(f.text)}</b></p><small>${esc(f.why)}</small></div><button class="btn small" data-act="chase-owner" data-owner="${esc(f.task.owner)}">Chase ${esc(f.task.owner)}</button></li>`).join('')}</ul></section>` : ''}
+    <div class="toolbar"><div class="seg" role="group" aria-label="Filter tasks">${[['all', 'All tasks'], ['open', 'Open'], ['late', 'Overdue']].map(([k, v]) => `<button aria-pressed="${ui.filter === k}" data-act="filter" data-k="${k}">${v}</button>`).join('')}</div>
+      <span class="eyebrow">Workstreams follow the launch template</span></div>
+    ${groups || '<p class="empty panel">No tasks match this filter.</p>'}`;
+}
+function taskRow(t, l) {
+  const late = t.status !== 'done' && t.due < T;
+  return `<div class="task ${t.status === 'done' ? 'is-done' : ''}" data-tid="${t.id}">
+    <input type="checkbox" id="c-${t.id}" ${t.status === 'done' ? 'checked' : ''} data-act="toggle" aria-label="Mark ${esc(t.name)} done">
+    <div><span class="tname">${esc(t.name)}${t.crit ? '<span class="tag crit">Critical</span>' : ''}</span>
+      <input class="note" id="n-${t.id}" data-act="note" value="${esc(t.note)}" placeholder="Add a note"></div>
+    <select id="o-${t.id}" data-act="owner" aria-label="Owner">${ownerOptions(t.owner)}</select>
+    <div class="due"><input type="date" id="d-${t.id}" value="${iso(t.due)}" data-act="due" aria-label="Due date"><small class="${late ? 'late' : ''}">${tLabel(t.due, l.date)} · ${t.status === 'done' ? 'done ' + fmt(t.doneOn ?? t.due, { day: 'numeric', month: 'short' }) : rel(t.due)}</small></div>
+    <select id="s-${t.id}" class="st st-${t.status}" data-act="status" aria-label="Status">${Object.entries(STATUS).map(([k, v]) => `<option value="${k}" ${k === t.status ? 'selected' : ''}>${v}</option>`).join('')}</select>
+    <button class="x" data-act="del-task" title="Remove task" aria-label="Remove ${esc(t.name)}">×</button>
+  </div>`;
+}
+function ownerOptions(sel) {
+  const groups = ['Team', 'Freelancer', 'Supplier'];
+  const has = S.people.some(p => p.name === sel);
+  return (has ? '' : `<option selected>${esc(sel)}</option>`) + groups.map(g => `<optgroup label="${g}s">${S.people.filter(p => p.type === g).map(p => `<option ${p.name === sel ? 'selected' : ''}>${esc(p.name)}</option>`).join('')}</optgroup>`).join('');
+}
+
+function nudge(owner, items) {
+  const p = person(owner);
+  const lines = items.map(({ t, l }) => `• ${t.name} (${l.name}): due ${fmt(t.due)}, ${t.due < T ? rel(t.due) : 'due ' + rel(t.due)}${t.crit ? '. Critical path, launch is ' + rel(l.date) : ''}`);
+  const late = items.some(({ t }) => t.due < T);
+  return `Hi ${p.name},\n\nQuick check-in on ${items.length > 1 ? 'a few launch items' : 'one launch item'}:\n${lines.join('\n')}\n\n${late ? 'Could you send me a realistic new date today, and tell me if anything is blocking you?' : 'Are these still on track for the dates above? Shout early if anything is at risk.'}\n\nThanks!`;
+}
+function chase() {
+  const byOwner = {};
+  for (const l of S.launches) if (l.date >= T) for (const t of l.tasks)
+    if (t.status !== 'done' && t.due <= T + 7) (byOwner[t.owner] ||= []).push({ t, l });
+  const owners = Object.entries(byOwner).map(([name, items]) => ({ name, items: items.sort((a, b) => a.t.due - b.t.due), late: items.filter(i => i.t.due < T).length, blocked: items.filter(i => i.t.status === 'blocked').length }))
+    .sort((a, b) => b.late - a.late || b.blocked - a.blocked || a.items[0].t.due - b.items[0].t.due);
+  const sent = ui.sent || {};
+  return `
+    <div class="view-head"><div><h2>Chase list</h2><p>Everyone with something overdue or due in the next 7 days, across all launches. Copy a ready-made nudge, then log when you chased.</p></div></div>
+    ${owners.length ? `<div class="owners">${owners.map(o => { const p = person(o.name); const msg = nudge(o.name, o.items); return `
+      <section class="panel owner" id="owner-${esc(o.name).replace(/\W/g, '')}">
+        <div class="owner-h"><div><h3>${esc(o.name)}</h3><small>${esc(p.role)}</small></div><div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:end"><span class="tag">${p.type}</span>${o.late ? `<span class="pill h-off">${o.late} late</span>` : ''}${o.blocked ? `<span class="pill h-risk">${o.blocked} blocked</span>` : ''}</div></div>
+        <ul class="mini">${o.items.map(({ t, l }) => `<li><span class="when ${t.due < T ? 'late' : ''}">${t.due < T ? (T - t.due) + 'd late' : fmt(t.due, { weekday: 'short', day: 'numeric' })}</span><span>${esc(t.name)}<small>${esc(l.name)}${t.note ? ' · ' + esc(t.note) : ''}</small></span>${t.crit ? '<span class="tag crit">Critical</span>' : `<span class="ws-chip" ${wsStyle(t.ws)}>${WSMAP[t.ws]?.label}</span>`}</li>`).join('')}</ul>
+        ${ui.showMsg === o.name ? `<textarea id="msg-${esc(o.name).replace(/\W/g, '')}" readonly>${esc(msg)}</textarea>` : ''}
+        <div class="owner-f"><button class="btn small primary" data-act="copy" data-owner="${esc(o.name)}">Copy nudge</button><button class="btn small" data-act="show-msg" data-owner="${esc(o.name)}">${ui.showMsg === o.name ? 'Hide' : 'Preview'}</button><button class="btn small ghost" data-act="mark-chased" data-owner="${esc(o.name)}">Log chased</button>${sent[o.name] ? `<span>Chased ${sent[o.name]}</span>` : ''}</div>
+      </section>`; }).join('')}</div>` : '<p class="empty panel">Nobody to chase. Nothing is overdue or due this week.</p>'}`;
+}
+
+function templateView() {
+  const tp = S.template;
+  const maxOff = Math.max(...tp.map(t => t.off), 14);
+  const span = maxOff + 4;
+  const x = off => ((span - off) / span) * 100;
+  const ticks = []; for (let o = Math.ceil(maxOff / 14) * 14; o >= 0; o -= 14) ticks.push(o);
+  return `
+    <div class="view-head"><div><h2>Launch template</h2><p>The repeatable checklist every new launch starts from. Timings count back from launch day (T–0). Edits apply to launches you create from now on; retros can push changes here.</p></div>
+      <button class="btn primary" data-act="new-launch">New launch from template</button></div>
+    <section class="panel"><div class="panel-h"><h3>Shape of a launch</h3><span class="eyebrow num">${tp.length} tasks · kickoff T–${maxOff}</span></div>
+      <div class="timeline"><div class="tl">
+        ${WS.map((w, i) => `<div class="row" style="top:${i * 18}px"><b>${w.label}</b>${tp.filter(t => t.ws === w.k).map(t => `<span class="tick ${t.crit ? 'crit' : ''}" style="--h:${w.h};left:${x(t.off)}%" title="${esc(t.name)} · T–${t.off}"></span>`).join('')}</div>`).join('')}
+        <div class="axis">${ticks.map(o => `<span style="left:${x(o)}%">T–${o}</span>`).join('')}</div>
+      </div></div></section>
+    ${WS.map(w => `<section class="panel ws" style="margin-top:12px"><div class="ws-h"><span class="ws-chip" ${wsStyle(w.k)}>${w.label}</span><span class="prog">${tp.filter(t => t.ws === w.k).length} tasks</span></div>
+      ${tp.filter(t => t.ws === w.k).sort((a, b) => b.off - a.off).map(t => `<div class="tpl-row" data-tpl="${t.id}">
+        <input type="text" id="tn-${t.id}" value="${esc(t.name)}" data-act="tpl-name" aria-label="Task name">
+        <span class="tm">T–<input type="number" id="to-${t.id}" min="0" max="365" value="${t.off}" data-act="tpl-off" aria-label="Days before launch"></span>
+        <select id="tw-${t.id}" data-act="tpl-owner" aria-label="Default owner">${ownerOptions(t.owner)}</select>
+        <label><input type="checkbox" id="tc-${t.id}" ${t.crit ? 'checked' : ''} data-act="tpl-crit"> Critical</label>
+        <button class="x" data-act="tpl-del" aria-label="Remove ${esc(t.name)}">×</button></div>`).join('')}
+      <form class="addrow" data-form="tpl-add" data-ws="${w.k}" style="padding-left:16px"><input id="tpl-add-${w.k}" name="name" placeholder="Add a ${w.label.toLowerCase()} step and press Enter" autocomplete="off"></form></section>`).join('')}
+    <section class="panel" style="margin-top:12px"><div class="panel-h"><h3>Team, freelancers & suppliers</h3><span class="eyebrow">${S.people.length}</span></div>
+      <ul class="mini">${S.people.map(p => `<li><span class="tag" style="justify-self:start">${p.type}</span><span>${esc(p.name)}<small>${esc(p.role)}</small></span><span></span></li>`).join('')}</ul>
+      <form class="addrow" data-form="add-person" style="padding-left:16px;flex-wrap:wrap"><input id="pp-name" name="name" placeholder="Name" required><input id="pp-role" name="role" placeholder="Role"><select id="pp-type" name="type" style="border:1px solid var(--line);background:var(--bg);border-radius:6px"><option>Team</option><option>Freelancer</option><option>Supplier</option></select><button class="btn small">Add</button></form></section>`;
+}
+
+function retro() {
+  const done = sortedLaunches().filter(l => l.date < T).reverse();
+  if (!done.length) return `<div class="view-head"><div><h2>Launch retros</h2><p>Launches show up here the day after they go live.</p></div></div>`;
+  const l = launchById(ui.retroId) && launchById(ui.retroId).date < T ? launchById(ui.retroId) : done[0];
+  ui.retroId = l.id;
+  const r = l.retro;
+  const finished = l.tasks.filter(t => t.status === 'done' && t.doneOn != null);
+  const stats = WS.map(w => { const ts = finished.filter(t => t.ws === w.k); const late = ts.filter(t => t.doneOn > t.due); return { w, n: ts.length, late: late.length, days: late.reduce((s, t) => s + t.doneOn - t.due, 0) }; });
+  const maxDays = Math.max(1, ...stats.map(s => s.days));
+  const slipped = finished.filter(t => t.doneOn - t.due >= 2).sort((a, b) => (b.doneOn - b.due) - (a.doneOn - a.due));
+  const onTime = finished.length ? Math.round(finished.filter(t => t.doneOn <= t.due).length / finished.length * 100) : 0;
+  const vsTarget = r.revenue && r.target ? Math.round((r.revenue / r.target) * 100) : null;
+  return `
+    ${launchPicker(done, l.id, 'pick-retro')}
+    <div class="view-head"><div><div class="eyebrow">Launched ${fmt(l.date)} · ${T - l.date} days ago</div><h2>${esc(l.name)} retro</h2><p>What happened, where the plan slipped, and what to change in the template so the next launch runs smoother.</p></div></div>
+    <section class="panel"><div class="panel-h"><h3>Results</h3><span class="eyebrow">${vsTarget != null ? vsTarget + '% of target' : 'Enter results'}</span></div>
+      <div class="kv">
+        <label>Revenue (€)<input type="number" id="r-revenue" data-act="retro" data-k="revenue" value="${esc(r.revenue)}"></label>
+        <label>Target (€)<input type="number" id="r-target" data-act="retro" data-k="target" value="${esc(r.target)}"></label>
+        <label>Sell-through (%)<input type="number" id="r-st" data-act="retro" data-k="sellThrough" value="${esc(r.sellThrough)}"></label>
+        <label>Tasks on time<span class="derived">${onTime}% (${finished.filter(t => t.doneOn <= t.due).length}/${finished.length})</span></label>
+      </div></section>
+    <div class="two">
+      <section class="panel"><div class="panel-h"><h3>Days slipped by workstream</h3><span class="eyebrow">total late days</span></div>
+        <div class="slips">${stats.map(s => `<div class="slip" ${wsStyle(s.w.k)}><span>${s.w.label}</span><div class="bar"><span style="width:${s.days / maxDays * 100}%"></span></div><span class="v">${s.days}d · ${s.late}/${s.n}</span></div>`).join('')}</div></section>
+      <section class="panel"><div class="panel-h"><h3>Improve the template</h3><span class="eyebrow">from slips of 2+ days</span></div>
+        ${slipped.length ? `<ul class="flags sugg">${slipped.map(t => { const tp = S.template.find(x => x.id === t.tid); const slip = t.doneOn - t.due; const applied = r.applied?.includes(t.tid); return `<li><span class="sev ${slip >= 4 ? 'off' : 'risk'}"></span><div><p><b>${esc(t.name)}</b> landed ${slip} days late</p><small>${tp ? (applied ? `Template now starts it at T–${tp.off}.` : `Start it ${slip} days earlier: T–${tp.off} → T–${tp.off + slip}.`) : 'Not in the template any more.'}</small></div>${tp ? (applied ? '<span class="pill h-ok">Applied</span>' : `<button class="btn small" data-act="apply" data-tid="${t.tid}" data-slip="${slip}">Apply</button>`) : ''}</li>`; }).join('')}</ul>` : '<p class="empty">Nothing slipped by more than a day. Keep the template as it is.</p>'}</section>
+    </div>
+    <section class="panel" style="margin-top:16px"><div class="panel-h"><h3>Review notes</h3></div>
+      <div class="notes"><label>What worked<textarea id="r-wins" data-act="retro" data-k="wins">${esc(r.wins)}</textarea></label><label>What to fix next time<textarea id="r-misses" data-act="retro" data-k="misses">${esc(r.misses)}</textarea></label></div></section>`;
+}
+
+function modal() {
+  const m = ui.modal;
+  const date = m.date ? fromIso(m.date) : T + 60;
+  const maxOff = Math.max(...S.template.map(t => t.off));
+  const late = S.template.filter(t => date - t.off < T);
+  return `<div class="scrim" data-act="close-modal"><form class="modal" data-form="create-launch" role="dialog" aria-labelledby="ml">
+    <h3 id="ml">New launch</h3>
+    <label>Launch name<input id="m-name" name="name" required value="${esc(m.name || '')}" placeholder="e.g. SS27 Swim Capsule"></label>
+    <label>What's in it<input id="m-coll" name="collection" value="${esc(m.collection || '')}" placeholder="e.g. 4 styles, 2 colourways"></label>
+    <label>Launch day<input id="m-date" name="date" type="date" required value="${iso(date)}" data-act="modal-date"></label>
+    ${late.length ? `<p class="hint warn">Kickoff would be T–${maxOff}, ${fmt(date - maxOff)}. ${late.length} of ${S.template.length} tasks would start overdue, including ${esc(late.slice(0, 2).map(t => t.name).join(' and '))}. Consider a later date.</p>`
+      : `<p class="hint">${S.template.length} tasks from the template, starting ${fmt(date - maxOff)} (T–${maxOff}).</p>`}
+    <div class="row"><button type="button" class="btn" data-act="close-modal">Cancel</button><button class="btn primary">Create launch</button></div>
+  </form></div>`;
+}
+
+/* ---------- events ---------- */
+function toast(msg) { const el = document.createElement('div'); el.className = 'toast'; el.textContent = msg; document.body.appendChild(el); setTimeout(() => el.remove(), 2200); }
+function taskFromEl(el) { const row = el.closest('[data-tid]'); const l = launchById(ui.launchId); return { l, t: l?.tasks.find(t => t.id === row?.dataset.tid) }; }
+function tplFromEl(el) { return S.template.find(t => t.id === el.closest('[data-tpl]')?.dataset.tpl); }
+function chaseItems(owner) { const out = []; for (const l of S.launches) if (l.date >= T) for (const t of l.tasks) if (t.status !== 'done' && t.owner === owner && t.due <= T + 7) out.push({ t, l }); return out.sort((a, b) => a.t.due - b.t.due); }
+
+document.addEventListener('click', e => {
+  const el = e.target.closest('[data-act]');
+  if (!el) return;
+  const act = el.dataset.act;
+  if (act !== 'reset' && ui.resetArmed) { ui.resetArmed = false; }
+  if (act !== 'delete-launch' && ui.delArmed) ui.delArmed = null;
+  switch (act) {
+    case 'tab': ui.tab = el.dataset.k; render(); window.scrollTo(0, 0); break;
+    case 'open-launch': ui.launchId = el.dataset.id; ui.tab = 'launch'; ui.filter = 'all'; render(); window.scrollTo(0, 0); break;
+    case 'pick-launch': ui.launchId = el.dataset.id; render(); break;
+    case 'pick-retro': ui.retroId = el.dataset.id; render(); break;
+    case 'filter': ui.filter = el.dataset.k; render(); break;
+    case 'chase-owner': ui.tab = 'chase'; render(); document.getElementById('owner-' + el.dataset.owner.replace(/\W/g, ''))?.scrollIntoView({ block: 'center' }); break;
+    case 'del-task': { const { l, t } = taskFromEl(el); l.tasks = l.tasks.filter(x => x !== t); render(); toast('Task removed'); break; }
+    case 'delete-launch':
+      if (ui.delArmed === el.dataset.id) { S.launches = S.launches.filter(l => l.id !== el.dataset.id); ui.delArmed = null; ui.launchId = null; toast('Launch deleted'); }
+      else ui.delArmed = el.dataset.id;
+      render(); break;
+    case 'new-launch': ui.modal = { date: iso(T + 60) }; render(); document.getElementById('m-name')?.focus(); break;
+    case 'close-modal': if (e.target === el) { ui.modal = null; render(); } break;
+    case 'show-msg': ui.showMsg = ui.showMsg === el.dataset.owner ? null : el.dataset.owner; render(); break;
+    case 'mark-chased': (ui.sent ||= {})[el.dataset.owner] = 'today ' + new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }); render(); break;
+    case 'copy': {
+      const owner = el.dataset.owner; const text = nudge(owner, chaseItems(owner));
+      const fallback = () => { ui.showMsg = owner; render(); const ta = document.getElementById('msg-' + owner.replace(/\W/g, '')); ta?.focus(); ta?.select(); toast('Select-all is on. Press copy on your keyboard.'); };
+      try { navigator.clipboard.writeText(text).then(() => toast(`Nudge for ${owner} copied`), fallback); } catch (err) { fallback(); }
+      break;
+    }
+    case 'apply': {
+      const l = launchById(ui.retroId); const tp = S.template.find(t => t.id === el.dataset.tid);
+      if (tp) { tp.off += Number(el.dataset.slip); (l.retro.applied ||= []).push(tp.id); toast(`Template updated: ${tp.name} now T–${tp.off}`); }
+      render(); break;
+    }
+    case 'tpl-del': S.template = S.template.filter(t => t !== tplFromEl(el)); render(); break;
+    case 'reset':
+      if (ui.resetArmed) { S = sample(); ui = { tab: 'roadmap', launchId: null, retroId: null, filter: 'all', modal: null, resetArmed: false }; toast('Sample data restored'); }
+      else ui.resetArmed = true;
+      render(); break;
+  }
+});
+
+document.addEventListener('change', e => {
+  const el = e.target; const act = el.dataset.act;
+  if (!act) return;
+  if (['toggle', 'owner', 'due', 'status', 'note'].includes(act)) {
+    const { t } = taskFromEl(el); if (!t) return;
+    if (act === 'toggle') { t.status = el.checked ? 'done' : 'todo'; t.doneOn = el.checked ? T : null; }
+    if (act === 'status') { t.status = el.value; t.doneOn = el.value === 'done' ? (t.doneOn ?? T) : null; }
+    if (act === 'owner') t.owner = el.value;
+    if (act === 'due' && el.value) t.due = fromIso(el.value);
+    if (act === 'note') { t.note = el.value; save(); return; }
+    render(); return;
+  }
+  if (act === 'launch-date' && el.value) {
+    const l = launchById(ui.launchId); const nd = fromIso(el.value); const delta = nd - l.date;
+    if (ui.shift !== false) for (const t of l.tasks) if (t.status !== 'done') t.due += delta;
+    l.date = nd; render(); toast(delta ? `Launch moved ${delta > 0 ? 'later' : 'earlier'} by ${Math.abs(delta)} days` : 'Launch date unchanged'); return;
+  }
+  if (act === 'shift-toggle') { ui.shift = el.checked; return; }
+  if (act === 'retro') { const l = launchById(ui.retroId); const k = el.dataset.k; l.retro[k] = el.type === 'number' ? (el.value === '' ? '' : Number(el.value)) : el.value; if (el.type === 'number') render(); else save(); return; }
+  if (act.startsWith('tpl-')) {
+    const tp = tplFromEl(el); if (!tp) return;
+    if (act === 'tpl-name') tp.name = el.value.trim() || tp.name;
+    if (act === 'tpl-off') tp.off = Math.max(0, Math.round(Number(el.value) || 0));
+    if (act === 'tpl-owner') tp.owner = el.value;
+    if (act === 'tpl-crit') tp.crit = el.checked;
+    render(); return;
+  }
+  if (act === 'modal-date') { ui.modal = { ...ui.modal, date: el.value, name: document.getElementById('m-name').value, collection: document.getElementById('m-coll').value }; render(); document.getElementById('m-date')?.focus(); }
+});
+
+document.addEventListener('submit', e => {
+  const f = e.target; e.preventDefault();
+  const fd = new FormData(f); const name = String(fd.get('name') || '').trim();
+  if (f.dataset.form === 'add-task' && name) {
+    const l = launchById(ui.launchId);
+    l.tasks.push({ id: uid(), tid: null, ws: f.dataset.ws, name, due: Math.max(T, l.date - 7), owner: 'Shan', crit: false, status: 'todo', doneOn: null, note: '' });
+    render(); document.getElementById('add-' + f.dataset.ws)?.focus();
+  }
+  if (f.dataset.form === 'tpl-add' && name) {
+    S.template.push({ id: 't' + uid(), ws: f.dataset.ws, name, off: 14, owner: 'Shan', crit: false });
+    render(); document.getElementById('tpl-add-' + f.dataset.ws)?.focus();
+  }
+  if (f.dataset.form === 'add-person' && name) {
+    S.people.push({ name, role: String(fd.get('role') || ''), type: String(fd.get('type')) }); render(); toast(`${name} added`);
+  }
+  if (f.dataset.form === 'create-launch' && name && fd.get('date')) {
+    const date = fromIso(String(fd.get('date')));
+    const l = { id: uid(), name, collection: String(fd.get('collection') || ''), date, tasks: genTasks(date, S.template), retro: { revenue: '', target: '', sellThrough: '', units: '', wins: '', misses: '', applied: [] } };
+    S.launches.push(l); ui.modal = null; ui.launchId = l.id; ui.tab = 'launch'; ui.filter = 'all'; render(); window.scrollTo(0, 0); toast(`${name} created with ${l.tasks.length} tasks`);
+  }
+});
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && ui.modal) { ui.modal = null; render(); } });
+
+render();
+</script>
+</body>
+</html>
